@@ -1,14 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DormBuddy - Your AI College Sidekick</title>
     <meta name="description" content="DormBuddy is your AI-powered college assistant with fun personalities to help you with academics, life advice, and emotional support." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom Scrollbar for a modern look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            border: 3px solid transparent;
+        }
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#111015]">
+
+    <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 text-white">
+      <div 
+        class="w-full max-w-2xl h-full sm:h-[95vh] bg-black/30 backdrop-blur-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/10"
+        style="background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0) 50%)"
+      >
+        <!-- Header -->
+        <div class="text-center p-6 border-b border-white/10">
+            <div class="inline-flex items-center justify-center space-x-3">
+                <div class="w-14 h-14 bg-white/10 p-2 rounded-2xl animate-float">
+                    <div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
+                        <span class="text-2xl">🏠</span>
+                    </div>
+                </div>
+                <h1 class="text-4xl font-bold text-white/90 tracking-tighter">DormBuddy</h1>
+            </div>
+            <p class="text-white/60 text-sm mt-1">Your AI college sidekick ✨</p>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="py-4 px-6">
+            <div id="mode-selector" class="flex justify-center items-center gap-3">
+                <!-- Mode buttons will be injected here by JS -->
+            </div>
+        </div>
+        
+        <!-- Chat Area -->
+        <div id="messages-area" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+            <!-- Messages will be injected here by JS -->
+        </div>
+
+        <!-- Error Message Area -->
+        <div id="error-container" class="px-6 pb-2"></div>
+
+        <!-- Input Area -->
+        <div class="p-4 bg-black/20 border-t border-white/10">
+          <div class="flex items-center bg-white/5 rounded-xl p-1">
+            <input
+              id="chat-input"
+              type="text"
+              class="flex-1 bg-transparent border-none outline-none px-3 py-2 text-white placeholder-white/40"
+              placeholder="Ask your DormBuddy anything..."
+            />
+            <button
+              id="send-button"
+              class="bg-purple-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+        // --- STATE MANAGEMENT ---
+        let state = {
+            messages: [
+                {
+                    id: crypto.randomUUID(),
+                    text: "Hey! I'm DormBuddy 👋 Your AI college sidekick. Pick a vibe and let's chat!",
+                    sender: "bot"
+                }
+            ],
+            personality: "roomie",
+            isLoading: false,
+            error: ""
+        };
+
+        const modes = [
+            { id: "professor", label: "Professor", emoji: "🧑‍🏫", color: "from-blue-400 to-blue-600" },
+            { id: "therapist", label: "Therapist Bro", emoji: "🧘", color: "from-green-400 to-green-600" },
+            { id: "roomie", label: "Chill Roomie", emoji: "😎", color: "from-purple-500 to-pink-500" },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const messagesArea = document.getElementById('messages-area');
+        const modeSelectorContainer = document.getElementById('mode-selector');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const errorContainer = document.getElementById('error-container');
+
+        // --- RENDER FUNCTIONS ---
+        const renderMessages = () => {
+            messagesArea.innerHTML = '';
+            state.messages.forEach(msg => {
+                const bubble = createChatBubble(msg.text, msg.sender, msg.isStreaming);
+                messagesArea.appendChild(bubble);
+            });
+            scrollToBottom();
+        };
+
+        const renderModeSelector = () => {
+            modeSelectorContainer.innerHTML = '';
+            modes.forEach(m => {
+                const button = document.createElement('button');
+                button.dataset.id = m.id;
+                button.className = `relative flex-1 px-4 py-3 rounded-xl transition-all duration-300 text-white font-semibold text-sm ${state.personality === m.id ? `bg-white/20 scale-105 shadow-lg` : "bg-white/5 hover:bg-white/10"}`;
+                button.innerHTML = `
+                    <div class="absolute -inset-px rounded-xl bg-gradient-to-r ${m.color} opacity-0 transition-opacity duration-300 ${state.personality === m.id ? 'opacity-100' : ''}"></div>
+                    <div class="relative flex items-center justify-center gap-2">
+                        <span>${m.emoji}</span>
+                        <span>${m.label}</span>
+                    </div>
+                `;
+                button.onclick = () => {
+                    state.personality = m.id;
+                    renderModeSelector();
+                };
+                modeSelectorContainer.appendChild(button);
+            });
+        };
+        
+        const createChatBubble = (text, sender, isStreaming = false) => {
+            const isUser = sender === "user";
+            const bubbleWrapper = document.createElement('div');
+            bubbleWrapper.className = `flex items-end gap-2 ${isUser ? "justify-end" : "justify-start"}`;
+            
+            let avatarHtml = '';
+            if (!isUser) {
+                avatarHtml = '<div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex-shrink-0"></div>';
+            }
+
+            const streamingCursor = isStreaming ? '<span class="inline-block w-0.5 h-4 bg-white/80 animate-pulse ml-1 translate-y-0.5"></span>' : '';
+
+            bubbleWrapper.innerHTML = `
+                ${avatarHtml}
+                <div class="max-w-md md:max-w-lg px-4 py-3 rounded-2xl shadow-md text-white/90 ${isUser ? "bg-blue-500 rounded-br-none" : "bg-white/10 rounded-bl-none"}">
+                    <p class="text-sm leading-relaxed whitespace-pre-wrap break-words">${text}${streamingCursor}</p>
+                </div>
+            `;
+            return bubbleWrapper;
+        };
+        
+        const renderError = () => {
+            if (state.error) {
+                errorContainer.innerHTML = `<p class="text-center text-red-400 text-sm bg-red-500/10 p-2 rounded-lg">${state.error}</p>`;
+            } else {
+                errorContainer.innerHTML = '';
+            }
+        };
+
+        const updateLoadingState = () => {
+            chatInput.disabled = state.isLoading;
+            sendButton.disabled = state.isLoading || !chatInput.value.trim();
+        };
+
+        // --- LOGIC ---
+        const scrollToBottom = () => {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        };
+
+        const sendMessage = async () => {
+            const userInput = chatInput.value.trim();
+            if (!userInput || state.isLoading) return;
+
+            // Add user message to state and re-render
+            state.messages.push({ id: crypto.randomUUID(), text: userInput, sender: "user" });
+            chatInput.value = '';
+            state.error = '';
+            state.isLoading = true;
+            renderMessages();
+            renderError();
+            updateLoadingState();
+            
+            try {
+                const res = await axios.post("http://localhost:8000/chat", {
+                    message: userInput,
+                    personality: state.personality,
+                });
+
+                const fullReply = res.data.reply;
+                if (!fullReply) throw new Error("Invalid response from server");
+
+                const botMsgId = crypto.randomUUID();
+                state.messages.push({ id: botMsgId, text: "", sender: "bot", isStreaming: true });
+                renderMessages();
+
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index < fullReply.length) {
+                        const msgToUpdate = state.messages.find(m => m.id === botMsgId);
+                        if(msgToUpdate) {
+                            msgToUpdate.text = fullReply.substring(0, index + 1);
+                            renderMessages();
+                        }
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                        const msgToUpdate = state.messages.find(m => m.id === botMsgId);
+                        if(msgToUpdate) msgToUpdate.isStreaming = false;
+                        state.isLoading = false;
+                        renderMessages();
+                        updateLoadingState();
+                    }
+                }, 20);
+
+            } catch (err) {
+                console.error("Chat error:", err);
+                state.error = "Sorry, I'm having trouble connecting right now. Please try again. 😅";
+                state.isLoading = false;
+                renderError();
+                updateLoadingState();
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        chatInput.addEventListener('input', updateLoadingState);
+
+        // --- INITIAL RENDER ---
+        renderMessages();
+        renderModeSelector();
+        updateLoadingState();
+
+    </script>
+</body>
 </html>
