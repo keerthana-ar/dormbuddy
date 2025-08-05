@@ -20,6 +20,14 @@ app.add_middleware(
 
 class MessageRequest(BaseModel):
     message: str
+    personality: str = "roomie"
+
+system_messages = {
+    "professor": "You are DormBuddy, a highly knowledgeable professor who explains things clearly and helps students succeed academically.",
+    "roomie": "You are DormBuddy, a chill and funny college roommate who gives advice like a best friend and always has your back.",
+    "therapist": "You are DormBuddy, a calm and empathetic therapist who helps students deal with stress, motivation, and emotional issues with kindness and support."
+}
+
 
 @app.get("/")
 def root():
@@ -27,6 +35,8 @@ def root():
 
 @app.post("/chat")
 async def chat_with_groq(req: MessageRequest):
+    system_prompt = system_messages.get(req.personality, system_messages["roomie"])
+
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
@@ -35,7 +45,7 @@ async def chat_with_groq(req: MessageRequest):
     payload = {
         "model": "llama3-70b-8192",
         "messages": [
-            {"role": "system", "content": "You are DormBuddy, a chatbot that helps students with timetables, tasks, motivation, and social advice."},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": req.message}
         ]
     }
