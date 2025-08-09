@@ -11,8 +11,8 @@ DormBuddy is an AI-powered college assistant web app with fun personalities to h
 
 - **Three AI personalities:**
   - **Professor:** Academic help, clear explanations
-  - **Therapist Bro:** Emotional support, kind advice
-  - **Chill Roomie:** Casual, friendly, Gen Z-coded advice
+  - **Therapist:** Emotional support, kind advice
+  - **Roomie:** Casual, friendly, Gen Z-coded advice
 
 - **Modern UI:**
   - Responsive, clean design using Tailwind CSS
