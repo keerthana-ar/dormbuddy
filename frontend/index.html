@@ -15,7 +15,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -23,81 +23,220 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        /* Custom Scrollbar for a modern look */
+        
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6));
             border-radius: 10px;
-            border: 3px solid transparent;
         }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8));
+        }
+        
         /* Custom Animations */
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
         }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(236, 72, 153, 0.4); }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.33);
+                opacity: 1;
+            }
+            80%, 100% {
+                transform: scale(1.33);
+                opacity: 0;
+            }
+        }
+        
         .animate-float {
-            animation: float 6s ease-in-out infinite;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .animate-glow {
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        .animate-slide-in-up {
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        .animate-pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #8B5CF6, #EC4899, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Custom button hover effects */
+        .btn-hover {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-hover:hover::before {
+            left: 100%;
+        }
+        
+        /* Message bubble animations */
+        .message-bubble {
+            animation: slideInUp 0.4s ease-out;
+        }
+        
+        /* Typing indicator */
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
-<body class="bg-[#111015]">
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
+    <!-- Animated background elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
 
-    <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 text-white">
-      <div 
-        class="w-full max-w-2xl h-full sm:h-[95vh] bg-black/30 backdrop-blur-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/10"
-        style="background: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0) 50%)"
-      >
-        <!-- Header -->
-        <div class="text-center p-6 border-b border-white/10">
-            <div class="inline-flex items-center justify-center space-x-3">
-                <div class="w-14 h-14 bg-white/10 p-2 rounded-2xl animate-float">
-                    <div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                        <span class="text-2xl">🏠</span>
+    <div id="app-container" class="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6">
+        <div class="w-full max-w-4xl h-[95vh] glass-strong rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-glow">
+            <!-- Header -->
+            <div class="relative text-center p-8 border-b border-white/10">
+                <!-- Pulse rings around logo -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div class="w-20 h-20 rounded-full border border-purple-400/30 animate-pulse-ring"></div>
+                    <div class="w-20 h-20 rounded-full border border-pink-400/30 animate-pulse-ring" style="animation-delay: 1s;"></div>
+                </div>
+                
+                <div class="relative inline-flex items-center justify-center space-x-4">
+                    <div class="relative">
+                        <div class="w-16 h-16 glass p-3 rounded-2xl animate-float">
+                            <div class="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                                <span class="text-2xl">🏠</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-5xl font-bold gradient-text tracking-tight">DormBuddy</h1>
+                        <p class="text-white/60 text-sm mt-2 font-medium">Your AI college sidekick ✨</p>
                     </div>
                 </div>
-                <h1 class="text-4xl font-bold text-white/90 tracking-tighter">DormBuddy</h1>
             </div>
-            <p class="text-white/60 text-sm mt-1">Your AI college sidekick ✨</p>
-        </div>
 
-        <!-- Mode Selector -->
-        <div class="py-4 px-6">
-            <div id="mode-selector" class="flex justify-center items-center gap-3">
-                <!-- Mode buttons will be injected here by JS -->
+            <!-- Mode Selector -->
+            <div class="py-6 px-8">
+                <div id="mode-selector" class="flex justify-center items-center gap-4">
+                    <!-- Mode buttons will be injected here by JS -->
+                </div>
+            </div>
+            
+            <!-- Chat Area -->
+            <div id="messages-area" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Messages will be injected here by JS -->
+            </div>
+
+            <!-- Error Message Area -->
+            <div id="error-container" class="px-8 pb-2"></div>
+
+            <!-- Input Area -->
+            <div class="p-6 glass border-t border-white/10">
+                <div class="flex items-center glass-strong rounded-2xl p-2 shadow-lg">
+                    <input
+                        id="chat-input"
+                        type="text"
+                        class="flex-1 bg-transparent border-none outline-none px-4 py-3 text-white placeholder-white/50 text-sm font-medium"
+                        placeholder="Ask your DormBuddy anything..."
+                    />
+                    <button
+                        id="send-button"
+                        class="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-600 btn-hover shadow-lg"
+                    >
+                        <span class="flex items-center gap-2">
+                            <span>Send</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
-        
-        <!-- Chat Area -->
-        <div id="messages-area" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-            <!-- Messages will be injected here by JS -->
-        </div>
-
-        <!-- Error Message Area -->
-        <div id="error-container" class="px-6 pb-2"></div>
-
-        <!-- Input Area -->
-        <div class="p-4 bg-black/20 border-t border-white/10">
-          <div class="flex items-center bg-white/5 rounded-xl p-1">
-            <input
-              id="chat-input"
-              type="text"
-              class="flex-1 bg-transparent border-none outline-none px-3 py-2 text-white placeholder-white/40"
-              placeholder="Ask your DormBuddy anything..."
-            />
-            <button
-              id="send-button"
-              class="bg-purple-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-500"
-            >
-              Send
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <script type="module">
@@ -116,9 +255,9 @@
         };
 
         const modes = [
-            { id: "professor", label: "Professor", emoji: "🧑‍🏫", color: "from-blue-400 to-blue-600" },
-            { id: "therapist", label: "Therapist Bro", emoji: "🧘", color: "from-green-400 to-green-600" },
-            { id: "roomie", label: "Chill Roomie", emoji: "😎", color: "from-purple-500 to-pink-500" },
+            { id: "professor", label: "Professor", emoji: "🧑‍🏫", color: "from-blue-500 to-indigo-600", hoverColor: "from-blue-600 to-indigo-700" },
+            { id: "therapist", label: "Therapist Bro", emoji: "🧘", color: "from-emerald-500 to-teal-600", hoverColor: "from-emerald-600 to-teal-700" },
+            { id: "roomie", label: "Chill Roomie", emoji: "😎", color: "from-purple-500 to-pink-600", hoverColor: "from-purple-600 to-pink-700" },
         ];
 
         // --- DOM ELEMENTS ---
@@ -131,8 +270,9 @@
         // --- RENDER FUNCTIONS ---
         const renderMessages = () => {
             messagesArea.innerHTML = '';
-            state.messages.forEach(msg => {
+            state.messages.forEach((msg, index) => {
                 const bubble = createChatBubble(msg.text, msg.sender, msg.isStreaming);
+                bubble.style.animationDelay = `${index * 0.1}s`;
                 messagesArea.appendChild(bubble);
             });
             scrollToBottom();
@@ -143,12 +283,17 @@
             modes.forEach(m => {
                 const button = document.createElement('button');
                 button.dataset.id = m.id;
-                button.className = `relative flex-1 px-4 py-3 rounded-xl transition-all duration-300 text-white font-semibold text-sm ${state.personality === m.id ? `bg-white/20 scale-105 shadow-lg` : "bg-white/5 hover:bg-white/10"}`;
+                const isActive = state.personality === m.id;
+                button.className = `relative flex-1 px-6 py-4 rounded-2xl transition-all duration-300 text-white font-semibold text-sm btn-hover ${
+                    isActive 
+                        ? `bg-gradient-to-r ${m.color} scale-105 shadow-xl` 
+                        : "glass hover:glass-strong hover:scale-102"
+                }`;
                 button.innerHTML = `
-                    <div class="absolute -inset-px rounded-xl bg-gradient-to-r ${m.color} opacity-0 transition-opacity duration-300 ${state.personality === m.id ? 'opacity-100' : ''}"></div>
-                    <div class="relative flex items-center justify-center gap-2">
-                        <span>${m.emoji}</span>
-                        <span>${m.label}</span>
+                    <div class="relative flex items-center justify-center gap-3">
+                        <span class="text-lg">${m.emoji}</span>
+                        <span class="font-medium">${m.label}</span>
+                        ${isActive ? '<div class="absolute -inset-1 bg-gradient-to-r ' + m.color + ' rounded-2xl blur opacity-30"></div>' : ''}
                     </div>
                 `;
                 button.onclick = () => {
@@ -162,19 +307,32 @@
         const createChatBubble = (text, sender, isStreaming = false) => {
             const isUser = sender === "user";
             const bubbleWrapper = document.createElement('div');
-            bubbleWrapper.className = `flex items-end gap-2 ${isUser ? "justify-end" : "justify-start"}`;
+            bubbleWrapper.className = `flex items-end gap-3 message-bubble ${isUser ? "justify-end" : "justify-start"}`;
             
             let avatarHtml = '';
             if (!isUser) {
-                avatarHtml = '<div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex-shrink-0"></div>';
+                avatarHtml = `
+                    <div class="relative flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                            <span class="text-sm">🤖</span>
+                        </div>
+                        <div class="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20"></div>
+                    </div>
+                `;
             }
 
-            const streamingCursor = isStreaming ? '<span class="inline-block w-0.5 h-4 bg-white/80 animate-pulse ml-1 translate-y-0.5"></span>' : '';
+            const streamingIndicator = isStreaming ? 
+                '<div class="typing-dots ml-2"><span></span><span></span><span></span></div>' : '';
+
+            const bubbleClass = isUser 
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl rounded-br-md shadow-lg" 
+                : "glass-strong rounded-2xl rounded-bl-md shadow-lg";
 
             bubbleWrapper.innerHTML = `
                 ${avatarHtml}
-                <div class="max-w-md md:max-w-lg px-4 py-3 rounded-2xl shadow-md text-white/90 ${isUser ? "bg-blue-500 rounded-br-none" : "bg-white/10 rounded-bl-none"}">
-                    <p class="text-sm leading-relaxed whitespace-pre-wrap break-words">${text}${streamingCursor}</p>
+                <div class="max-w-md md:max-w-2xl px-5 py-4 ${bubbleClass} text-white/95 relative">
+                    <p class="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">${text}${streamingIndicator}</p>
+                    ${!isUser ? '<div class="absolute -inset-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl blur"></div>' : ''}
                 </div>
             `;
             return bubbleWrapper;
@@ -182,7 +340,14 @@
         
         const renderError = () => {
             if (state.error) {
-                errorContainer.innerHTML = `<p class="text-center text-red-400 text-sm bg-red-500/10 p-2 rounded-lg">${state.error}</p>`;
+                errorContainer.innerHTML = `
+                    <div class="text-center animate-slide-in-up">
+                        <p class="text-red-300 text-sm glass-strong p-4 rounded-xl border border-red-500/20 shadow-lg">
+                            <span class="inline-block mr-2">⚠️</span>
+                            ${state.error}
+                        </p>
+                    </div>
+                `;
             } else {
                 errorContainer.innerHTML = '';
             }
@@ -191,6 +356,24 @@
         const updateLoadingState = () => {
             chatInput.disabled = state.isLoading;
             sendButton.disabled = state.isLoading || !chatInput.value.trim();
+            
+            if (state.isLoading) {
+                sendButton.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Thinking...</span>
+                    </span>
+                `;
+            } else {
+                sendButton.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <span>Send</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </span>
+                `;
+            }
         };
 
         // --- LOGIC ---
@@ -241,7 +424,7 @@
                         renderMessages();
                         updateLoadingState();
                     }
-                }, 20);
+                }, 15);
 
             } catch (err) {
                 console.error("Chat error:", err);
@@ -266,6 +449,15 @@
         renderMessages();
         renderModeSelector();
         updateLoadingState();
+
+        // Add some interactive effects
+        chatInput.addEventListener('focus', () => {
+            chatInput.parentElement.style.boxShadow = '0 0 30px rgba(139, 92, 246, 0.3)';
+        });
+        
+        chatInput.addEventListener('blur', () => {
+            chatInput.parentElement.style.boxShadow = '';
+        });
 
     </script>
 </body>
