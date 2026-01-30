@@ -1,464 +1,523 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DormBuddy - Your AI College Sidekick</title>
-    <meta name="description" content="DormBuddy is your AI-powered college assistant with fun personalities to help you with academics, life advice, and emotional support." />
-    
-    <!-- Tailwind CSS via CDN -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DormBuddy</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Axios for API calls -->
+    <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Inter (UI) & Merriweather (AI Body) & Söhne-like (optional, Inter is close enough) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap"
+        rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        :root {
+            --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-ai: 'Merriweather', Georgia, serif;
+            --bg-color: #f7f7f5;
+            /* Claude-like warm grey */
+            --pill-shadow: 0 1px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-color);
+            color: #3e3e3e;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Markdown-like Styles for AI */
+        .ai-content {
+            font-family: var(--font-ai);
+            font-size: 1rem;
+            line-height: 1.75;
+            color: #242424;
+        }
+
+        .ai-content p {
+            margin-bottom: 1em;
+        }
+
+        .ai-content strong {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
+
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6));
-            border-radius: 10px;
+            background-color: #d1d1d1;
+            border-radius: 3px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8));
+            background-color: #b0b0b0;
         }
-        
-        /* Custom Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
+
+        /* Input Animation */
+        .input-wrapper {
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(236, 72, 153, 0.4); }
+
+        .input-wrapper:focus-within {
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+            /* Subtle lift */
+            border-color: #d4d4d0;
         }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+
+        /* Cursor */
+        .typing-cursor::after {
+            content: '⬤';
+            font-size: 0.6em;
+            color: #da7756;
+            margin-left: 4px;
+            animation: pulse 1s infinite;
         }
-        
-        @keyframes pulse-ring {
+
+        @keyframes pulse {
             0% {
-                transform: scale(0.33);
+                opacity: 0.3;
+            }
+
+            50% {
                 opacity: 1;
             }
-            80%, 100% {
-                transform: scale(1.33);
-                opacity: 0;
+
+            100% {
+                opacity: 0.3;
             }
         }
-        
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
+
+        /* Sidebar Transition */
+        #sidebar {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
-        .animate-glow {
-            animation: glow 3s ease-in-out infinite;
+
+        .sidebar-open #sidebar {
+            transform: translateX(0);
         }
-        
-        .animate-slide-in-up {
-            animation: slideInUp 0.5s ease-out;
+
+        .sidebar-closed #sidebar {
+            transform: translateX(-100%);
         }
-        
-        .animate-pulse-ring {
-            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
-        }
-        
-        /* Glassmorphism effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .glass-strong {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        
-        /* Gradient text */
-        .gradient-text {
-            background: linear-gradient(135deg, #8B5CF6, #EC4899, #06B6D4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Custom button hover effects */
-        .btn-hover {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-hover::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn-hover:hover::before {
-            left: 100%;
-        }
-        
-        /* Message bubble animations */
-        .message-bubble {
-            animation: slideInUp 0.4s ease-out;
-        }
-        
-        /* Typing indicator */
-        .typing-dots {
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-        }
-        
-        .typing-dots span {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            animation: typing 1.4s infinite ease-in-out;
-        }
-        
-        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes typing {
-            0%, 80%, 100% {
-                transform: scale(0.8);
-                opacity: 0.5;
+
+        @media (min-width: 768px) {
+            .sidebar-closed #sidebar {
+                transform: translateX(-260px);
             }
-            40% {
-                transform: scale(1);
-                opacity: 1;
-            }
+
+            /* Hide fully or partially? Let's hide fully */
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen">
-    <!-- Animated background elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style="animation-delay: 4s;"></div>
-    </div>
 
-    <div id="app-container" class="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6">
-        <div class="w-full max-w-4xl h-[95vh] glass-strong rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-glow">
-            <!-- Header -->
-            <div class="relative text-center p-8 border-b border-white/10">
-                <!-- Pulse rings around logo -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-20 h-20 rounded-full border border-purple-400/30 animate-pulse-ring"></div>
-                    <div class="w-20 h-20 rounded-full border border-pink-400/30 animate-pulse-ring" style="animation-delay: 1s;"></div>
+<body class="h-screen w-full flex overflow-hidden selection:bg-stone-200">
+
+    <!-- Sidebar (Visual Only for now) -->
+    <aside id="sidebar"
+        class="w-[260px] h-full bg-[#f9f9f8] border-r border-[#e5e5e0] flex flex-col justify-between absolute md:relative z-20 transform -translate-x-full md:translate-x-0 hidden md:flex">
+        <div class="p-4">
+            <div class="flex items-center gap-2 mb-6 px-2">
+                <div
+                    class="w-7 h-7 bg-gradient-to-br from-[#d97757] to-[#e48e6f] rounded-[6px] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    DB
                 </div>
-                
-                <div class="relative inline-flex items-center justify-center space-x-4">
-                    <div class="relative">
-                        <div class="w-16 h-16 glass p-3 rounded-2xl animate-float">
-                            <div class="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                                <span class="text-2xl">🏠</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <h1 class="text-5xl font-bold gradient-text tracking-tight">DormBuddy</h1>
-                        <p class="text-white/60 text-sm mt-2 font-medium">Your AI college sidekick ✨</p>
-                    </div>
-                </div>
+                <span class="font-semibold text-stone-700 tracking-tight">DormBuddy</span>
             </div>
 
-            <!-- Mode Selector -->
-            <div class="py-6 px-8">
-                <div id="mode-selector" class="flex justify-center items-center gap-4">
-                    <!-- Mode buttons will be injected here by JS -->
-                </div>
-            </div>
-            
-            <!-- Chat Area -->
-            <div id="messages-area" class="flex-1 overflow-y-auto p-6 space-y-6">
-                <!-- Messages will be injected here by JS -->
-            </div>
+            <button id="new-chat-btn"
+                class="w-full flex items-center gap-3 px-3 py-2 bg-white border border-[#e5e5e0] rounded-lg shadow-sm hover:bg-stone-50 transition-colors text-sm font-medium text-stone-700 mb-6">
+                <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                New Chat
+            </button>
 
-            <!-- Error Message Area -->
-            <div id="error-container" class="px-8 pb-2"></div>
-
-            <!-- Input Area -->
-            <div class="p-6 glass border-t border-white/10">
-                <div class="flex items-center glass-strong rounded-2xl p-2 shadow-lg">
-                    <input
-                        id="chat-input"
-                        type="text"
-                        class="flex-1 bg-transparent border-none outline-none px-4 py-3 text-white placeholder-white/50 text-sm font-medium"
-                        placeholder="Ask your DormBuddy anything..."
-                    />
-                    <button
-                        id="send-button"
-                        class="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-600 btn-hover shadow-lg"
-                    >
-                        <span class="flex items-center gap-2">
-                            <span>Send</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                            </svg>
-                        </span>
-                    </button>
+            <div class="px-2">
+                <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Recents</h3>
+                <div id="recents-list" class="space-y-1">
+                    <!-- Dynamic chats will go here -->
                 </div>
             </div>
         </div>
-    </div>
+        <!-- Account section removed -->
+    </aside>
+
+    <script>
+        // Simple LocalStorage Logic for Sidebar
+        document.addEventListener('DOMContentLoaded', () => {
+            const newChatBtn = document.getElementById('new-chat-btn');
+            const recentsList = document.getElementById('recents-list');
+
+            // Load Chats
+            let chats = JSON.parse(localStorage.getItem('dormbuddy_chats') || '[]');
+            renderRecents();
+
+            // New Chat Functionality
+            newChatBtn.addEventListener('click', () => {
+                // Clear current view (visually only for now)
+                document.getElementById('messages-area').innerHTML = '';
+                // Reset state
+                state.messages = [];
+                // Add greeting again? Or just leave empty? User prefers "Pro". 
+                // Let's re-render the greeting to be safe.
+                renderMessage('assistant', "Hello! I'm DormBuddy. How can I help you today?", false);
+                state.currentChatId = Date.now().toString(); // New ID
+            });
+
+            function renderRecents() {
+                recentsList.innerHTML = '';
+                chats.forEach(chat => {
+                    const div = document.createElement('div');
+                    div.className = 'text-sm text-stone-600 px-2 py-1.5 rounded-md hover:bg-stone-100 cursor-pointer truncate';
+                    div.innerText = chat.title;
+                    div.onclick = () => loadChat(chat.id);
+                    recentsList.prepend(div);
+                });
+            }
+
+            // Expose for main script
+            window.saveChatToHistory = (message) => {
+                if (!state.currentChatId) state.currentChatId = Date.now().toString();
+
+                // If this is the first message of a new chat, add to history
+                const existing = chats.find(c => c.id === state.currentChatId);
+                if (!existing) {
+                    const title = message.substring(0, 30) + (message.length > 30 ? '...' : '');
+                    chats.push({ id: state.currentChatId, title: title, timestamp: Date.now() });
+                    localStorage.setItem('dormbuddy_chats', JSON.stringify(chats));
+                    renderRecents();
+                }
+            };
+
+            function loadChat(id) {
+                // For now, just a placeholder as we don't save full message history in this simple implementation
+                // To truly load, we'd need to save message arrays in localStorage too.
+                // Given constraints, we'll just focus on "Adding chats to that space" visual.
+                console.log("Loading chat", id);
+            }
+        });
+    </script>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative w-full bg-[#ffffff] md:bg-[#f7f7f5]">
+
+        <!-- Mobile Header -->
+        <header
+            class="md:hidden flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-white z-10 sticky top-0">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-6 h-6 bg-[#da7756] rounded-[4px] flex items-center justify-center text-white text-[10px] font-bold">
+                    DB</div>
+                <span class="font-medium text-stone-700">DormBuddy</span>
+            </div>
+            <button id="mobile-menu-btn" class="p-2 text-stone-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Chat Container -->
+        <div id="chat-scroller" class="flex-1 overflow-y-auto scroll-smooth">
+            <div id="messages-area" class="w-full max-w-[48rem] mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col gap-6">
+                <!-- Messages injected here -->
+            </div>
+            <div class="h-32"></div> <!-- Spacer for fixed input -->
+        </div>
+
+        <!-- Input Area (Fixed Bottom) -->
+        <div
+            class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#f7f7f5] via-[#f7f7f5] to-transparent pb-6 pt-10 px-4 md:px-0">
+            <div class="w-full max-w-[48rem] mx-auto">
+                <div
+                    class="input-wrapper bg-[#f4f4f3] border border-[#e5e5e0] rounded-2xl md:rounded-3xl shadow-sm relative overflow-visible transition-all">
+
+                    <!-- Textarea -->
+                    <textarea id="chat-input" placeholder="How can I help you today?" rows="1"
+                        class="w-full bg-transparent border-none px-4 md:px-5 py-4 text-[15px] md:text-[16px] text-stone-800 placeholder-stone-400 focus:ring-0 resize-none max-h-[200px]"
+                        style="min-height: 56px;"></textarea>
+
+                    <!-- Bottom Actions -->
+                    <div class="flex items-center justify-between px-2 md:px-3 pb-2 md:pb-3">
+                        <!-- Mode Selector (Left) -->
+                        <div class="relative group">
+                            <button
+                                class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-stone-200/50 rounded-lg transition-colors text-xs font-medium text-stone-600">
+                                <span id="mode-icon">🍻</span>
+                                <span id="mode-label">Roomie</span>
+                                <svg class="w-3 h-3 text-stone-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <!-- Mode Dropdown -->
+                            <div
+                                class="absolute bottom-full left-0 mb-2 w-40 bg-white border border-stone-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-1 z-50">
+                                <div onclick="setMode('roomie')"
+                                    class="px-3 py-2 hover:bg-stone-100 rounded-md cursor-pointer flex items-center gap-2 text-sm text-stone-700">
+                                    <span>🍻</span> Roomie
+                                </div>
+                                <div onclick="setMode('professor')"
+                                    class="px-3 py-2 hover:bg-stone-100 rounded-md cursor-pointer flex items-center gap-2 text-sm text-stone-700">
+                                    <span>🎓</span> Professor
+                                </div>
+                                <div onclick="setMode('therapist')"
+                                    class="px-3 py-2 hover:bg-stone-100 rounded-md cursor-pointer flex items-center gap-2 text-sm text-stone-700">
+                                    <span>🌷</span> Therapist
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send Button (Right) -->
+                        <button id="send-btn" disabled
+                            class="p-2 bg-[#da7756] text-white rounded-lg shadow-sm hover:bg-[#c26645] transition-all disabled:opacity-30 disabled:hover:bg-[#da7756]">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 12h14M12 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <p class="text-[11px] text-stone-400">DormBuddy can make mistakes. Verify important info.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div id="error-toast"
+            class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg shadow-lg text-sm hidden z-50 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span id="error-msg">Connection Error</span>
+        </div>
+
+    </main>
 
     <script type="module">
-        // --- STATE MANAGEMENT ---
+        // Data
+        const modes = {
+            'roomie': { label: 'Roomie', icon: '🍻' },
+            'professor': { label: 'Professor', icon: '🎓' },
+            'therapist': { label: 'Therapist', icon: '🌷' }
+        };
         let state = {
-            messages: [
-                {
-                    id: crypto.randomUUID(),
-                    text: "Hey! I'm DormBuddy 👋 Your AI college sidekick. Pick a vibe and let's chat!",
-                    sender: "bot"
-                }
-            ],
-            personality: "roomie",
+            personality: 'roomie',
+            messages: [],
             isLoading: false,
-            error: ""
+            currentChatId: null
         };
 
-        const modes = [
-            { id: "professor", label: "Professor", emoji: "🎓", color: "from-blue-500 to-indigo-600", hoverColor: "from-blue-600 to-indigo-700" },
-            { id: "therapist", label: "Therapist", emoji: "🌷", color: "from-emerald-500 to-teal-600", hoverColor: "from-emerald-600 to-teal-700" },
-            { id: "roomie", label: "Roomie", emoji: "🍻", color: "from-purple-500 to-pink-600", hoverColor: "from-purple-600 to-pink-700" },
-        ];
-
-        // --- DOM ELEMENTS ---
-        const messagesArea = document.getElementById('messages-area');
-        const modeSelectorContainer = document.getElementById('mode-selector');
+        // DOM
         const chatInput = document.getElementById('chat-input');
-        const sendButton = document.getElementById('send-button');
-        const errorContainer = document.getElementById('error-container');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesArea = document.getElementById('messages-area');
+        const scrollContainer = document.getElementById('chat-scroller');
+        const modeLabel = document.getElementById('mode-label');
+        const modeIcon = document.getElementById('mode-icon');
+        const errorToast = document.getElementById('error-toast');
+        const errorMsg = document.getElementById('error-msg');
+        // Sidebar DOM
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const recentsList = document.getElementById('recents-list');
 
-        // --- RENDER FUNCTIONS ---
-        const renderMessages = () => {
-            messagesArea.innerHTML = '';
-            state.messages.forEach((msg, index) => {
-                const bubble = createChatBubble(msg.text, msg.sender, msg.isStreaming);
-                bubble.style.animationDelay = `${index * 0.1}s`;
-                messagesArea.appendChild(bubble);
-            });
-            scrollToBottom();
+        // Functions
+        window.setMode = (id) => {
+            state.personality = id;
+            modeLabel.textContent = modes[id].label;
+            modeIcon.textContent = modes[id].icon;
         };
 
-        const renderModeSelector = () => {
-            modeSelectorContainer.innerHTML = '';
-            modes.forEach(m => {
-                const button = document.createElement('button');
-                button.dataset.id = m.id;
-                const isActive = state.personality === m.id;
-                button.className = `relative flex-1 px-6 py-4 rounded-2xl transition-all duration-300 text-white font-semibold text-sm btn-hover ${
-                    isActive 
-                        ? `bg-gradient-to-r ${m.color} scale-105 shadow-xl` 
-                        : "glass hover:glass-strong hover:scale-102"
-                }`;
-                button.innerHTML = `
-                    <div class="relative flex items-center justify-center gap-3">
-                        <span class="text-lg">${m.emoji}</span>
-                        <span class="font-medium">${m.label}</span>
-                        ${isActive ? '<div class="absolute -inset-1 bg-gradient-to-r ' + m.color + ' rounded-2xl blur opacity-30"></div>' : ''}
+        function adjustHeight() {
+            chatInput.style.height = 'auto';
+            if (chatInput.value.trim() === '') {
+                chatInput.style.height = '56px';
+                sendBtn.disabled = true;
+            } else {
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
+                sendBtn.disabled = false;
+            }
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                const element = document.getElementById('chat-scroller');
+                element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+            }, 50);
+        }
+
+        function renderMessage(role, content, isStreaming = false) {
+            const div = document.createElement('div');
+            const isUser = role === 'user';
+
+            div.className = `flex w-full gap-4 ${isUser ? 'justify-end' : 'justify-start'} mb-2`;
+
+            if (isUser) {
+                div.innerHTML = `
+                    <div class="bg-[#f0f0ee] text-[#1a1a1a] px-5 py-3 rounded-2xl max-w-[85%] md:max-w-[70%] text-[15px] leading-relaxed">
+                        ${content.replace(/\n/g, '<br>')}
                     </div>
                 `;
-                button.onclick = () => {
-                    state.personality = m.id;
-                    renderModeSelector();
-                };
-                modeSelectorContainer.appendChild(button);
-            });
-        };
-        
-        const createChatBubble = (text, sender, isStreaming = false) => {
-            const isUser = sender === "user";
-            const bubbleWrapper = document.createElement('div');
-            bubbleWrapper.className = `flex items-end gap-3 message-bubble ${isUser ? "justify-end" : "justify-start"}`;
-            
-            let avatarHtml = '';
-            if (!isUser) {
-                avatarHtml = `
-                    <div class="relative flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                            <span class="text-sm">🤖</span>
+            } else {
+                // AI Message
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-white border border-stone-200 flex items-center justify-center flex-shrink-0 text-sm shadow-sm mt-1">
+                        ${modes[state.personality].icon}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-xs text-stone-500 mb-1 ml-1">DormBuddy</div>
+                        <div class="ai-content text-[#1a1a1a]">
+                            ${formatAIContent(content)}
+                            ${isStreaming ? '<span class="typing-cursor"></span>' : ''}
                         </div>
-                        <div class="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur opacity-20"></div>
                     </div>
                 `;
             }
+            messagesArea.appendChild(div);
+            scrollToBottom();
+            return div;
+        }
 
-            const streamingIndicator = isStreaming ? 
-                '<div class="typing-dots ml-2"><span></span><span></span><span></span></div>' : '';
+        function formatAIContent(text) {
+            // Simple markdown parser
+            let html = text
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`([^`]+)`/g, '<code class="bg-stone-100 px-1 py-0.5 rounded text-sm font-mono text-red-500">$1</code>');
+            return `<p>${html}</p>`;
+        }
 
-            const bubbleClass = isUser 
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl rounded-br-md shadow-lg" 
-                : "glass-strong rounded-2xl rounded-bl-md shadow-lg";
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorToast.classList.remove('hidden');
+            setTimeout(() => errorToast.classList.add('hidden'), 5000);
+        }
 
-            bubbleWrapper.innerHTML = `
-                ${avatarHtml}
-                <div class="max-w-md md:max-w-2xl px-5 py-4 ${bubbleClass} text-white/95 relative">
-                    <p class="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">${text}${streamingIndicator}</p>
-                    ${!isUser ? '<div class="absolute -inset-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl blur"></div>' : ''}
-                </div>
-            `;
-            return bubbleWrapper;
-        };
-        
-        const renderError = () => {
-            if (state.error) {
-                errorContainer.innerHTML = `
-                    <div class="text-center animate-slide-in-up">
-                        <p class="text-red-300 text-sm glass-strong p-4 rounded-xl border border-red-500/20 shadow-lg">
-                            <span class="inline-block mr-2">⚠️</span>
-                            ${state.error}
-                        </p>
-                    </div>
-                `;
-            } else {
-                errorContainer.innerHTML = '';
-            }
-        };
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || state.isLoading) return;
 
-        const updateLoadingState = () => {
-            chatInput.disabled = state.isLoading;
-            sendButton.disabled = state.isLoading || !chatInput.value.trim();
-            
-            if (state.isLoading) {
-                sendButton.innerHTML = `
-                    <span class="flex items-center gap-2">
-                        <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Thinking...</span>
-                    </span>
-                `;
-            } else {
-                sendButton.innerHTML = `
-                    <span class="flex items-center gap-2">
-                        <span>Send</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                        </svg>
-                    </span>
-                `;
-            }
-        };
-
-        // --- LOGIC ---
-        const scrollToBottom = () => {
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        };
-
-        const sendMessage = async () => {
-            const userInput = chatInput.value.trim();
-            if (!userInput || state.isLoading) return;
-
-            // Add user message to state and re-render
-            state.messages.push({ id: crypto.randomUUID(), text: userInput, sender: "user" });
-            chatInput.value = '';
-            state.error = '';
             state.isLoading = true;
-            renderMessages();
-            renderError();
-            updateLoadingState();
+            chatInput.value = '';
+            adjustHeight();
+
+            renderMessage('user', text);
+
+            // Placeholder for AI
+            const aiContainer = renderMessage('assistant', '', true);
+            const aiTextDiv = aiContainer.querySelector('.ai-content');
 
             try {
-                const res = await axios.post("https://dormbuddy.onrender.com/chat", {
-                    message: userInput,
-                    personality: state.personality,
+                // Pointing to local backend
+                // Save to history before sending
+                saveChatToHistory(text);
+
+                const response = await axios.post('http://127.0.0.1:8000/chat', {
+                    message: text,
+                    personality: state.personality
                 });
 
-                const fullReply = res.data.reply;
-                if (!fullReply) throw new Error("Invalid response from server");
+                if (response.data.error) {
+                    throw new Error(response.data.error);
+                }
 
-                const botMsgId = crypto.randomUUID();
-                state.messages.push({ id: botMsgId, text: "", sender: "bot", isStreaming: true });
-                renderMessages();
-
-                let index = 0;
-                const interval = setInterval(() => {
-                    if (index < fullReply.length) {
-                        const msgToUpdate = state.messages.find(m => m.id === botMsgId);
-                        if(msgToUpdate) {
-                            msgToUpdate.text = fullReply.substring(0, index + 1);
-                            renderMessages();
-                        }
-                        index++;
-                    } else {
-                        clearInterval(interval);
-                        const msgToUpdate = state.messages.find(m => m.id === botMsgId);
-                        if(msgToUpdate) msgToUpdate.isStreaming = false;
-                        state.isLoading = false;
-                        renderMessages();
-                        updateLoadingState();
-                    }
-                }, 15);
+                const reply = response.data.reply;
+                aiTextDiv.innerHTML = formatAIContent(reply); // Replace with full text
 
             } catch (err) {
-                console.error("Chat error:", err);
-                state.error = "Sorry, I'm having trouble connecting right now. Please try again. 😅";
+                console.error(err);
+                aiContainer.remove(); // Remove empty bubble
+                let msg = "Connection Failed.";
+                if (err.response && err.response.data && err.response.data.error) {
+                    msg = err.response.data.error;
+                } else if (err.message) {
+                    msg = err.message;
+                }
+                showError(msg);
+            } finally {
                 state.isLoading = false;
-                renderError();
-                updateLoadingState();
             }
-        };
+        }
 
-        // --- EVENT LISTENERS ---
-        sendButton.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
+        // Listeners
+        chatInput.addEventListener('input', adjustHeight);
+        chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
-        chatInput.addEventListener('input', updateLoadingState);
+        sendBtn.addEventListener('click', sendMessage);
 
-        // --- INITIAL RENDER ---
-        renderMessages();
-        renderModeSelector();
-        updateLoadingState();
+        // --- Sidebar Logic ---
+        let chats = JSON.parse(localStorage.getItem('dormbuddy_chats') || '[]');
 
-        // Add some interactive effects
-        chatInput.addEventListener('focus', () => {
-            chatInput.parentElement.style.boxShadow = '0 0 30px rgba(139, 92, 246, 0.3)';
-        });
-        
-        chatInput.addEventListener('blur', () => {
-            chatInput.parentElement.style.boxShadow = '';
-        });
+        function renderRecents() {
+            if (!recentsList) return;
+            recentsList.innerHTML = '';
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'text-sm text-stone-600 px-2 py-1.5 rounded-md hover:bg-stone-100 cursor-pointer truncate';
+                div.innerText = chat.title;
+                div.onclick = () => loadChat(chat.id);
+                recentsList.prepend(div);
+            });
+        }
+
+        function saveChatToHistory(message) {
+            if (!state.currentChatId) state.currentChatId = Date.now().toString();
+
+            const existing = chats.find(c => c.id === state.currentChatId);
+            if (!existing) {
+                const title = message.substring(0, 30) + (message.length > 30 ? '...' : '');
+                chats.push({ id: state.currentChatId, title: title, timestamp: Date.now() });
+                localStorage.setItem('dormbuddy_chats', JSON.stringify(chats));
+                renderRecents();
+            }
+        }
+
+        if (newChatBtn) {
+            newChatBtn.addEventListener('click', () => {
+                messagesArea.innerHTML = '';
+                state.messages = [];
+                state.currentChatId = Date.now().toString();
+                renderMessage('assistant', "Hello! I'm DormBuddy. How can I help you today?");
+            });
+        }
+
+        function loadChat(id) {
+            // Just visual feedback for now as requested
+            console.log("Loading chat", id);
+            // In a real app, we would load messages from storage here
+        }
+
+        renderRecents(); // Init sidebar
+
+        // Initial Greeting
+        renderMessage('assistant', "Hello! I'm DormBuddy. How can I help you today?");
 
     </script>
 </body>
+
 </html>
