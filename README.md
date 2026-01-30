@@ -3,8 +3,6 @@
 > **Your AI-powered college companion.**  
 > A high-fidelity, Claude-like chat interface with 3 unique personalities designed to guide you through university life.
 
-![DormBuddy UI](https://via.placeholder.com/800x450.png?text=DormBuddy+Interface)
-
 ## ✨ Features
 
 - **Professional UI**: A pixel-perfect clone of modern chat interfaces (inspired by Claude.ai), featuring:
