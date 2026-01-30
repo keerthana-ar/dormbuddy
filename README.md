@@ -4,8 +4,8 @@ DormBuddy is an AI-powered college assistant web app with fun personalities to h
 
 ## Live Demo
 
-- **Frontend:** [DormBuddy on Netlify](https://your-netlify-site.netlify.app)
-- **Backend API:** [DormBuddy API on Render](https://your-render-backend-url.onrender.com)
+- **Frontend:** [DormBuddy on Netlify](https://dormbuddyyy.netlify.app/)
+- **Backend API:** [DormBuddy API on Render](https://dormbuddy.onrender.com/)
 
 ## Features
 
