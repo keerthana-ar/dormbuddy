@@ -507,12 +507,81 @@
         }
 
         function loadChat(id) {
-            // Just visual feedback for now as requested
             console.log("Loading chat", id);
-            // In a real app, we would load messages from storage here
+            state.currentChatId = id;
+
+            // 1. Load Messages
+            const saved = localStorage.getItem(`dormbuddy_msg_${id}`);
+            state.messages = saved ? JSON.parse(saved) : [];
+
+            // 2. Render
+            messagesArea.innerHTML = '';
+
+            if (state.messages.length === 0) {
+                renderMessage('assistant', "Hello! I'm DormBuddy. How can I help you today?");
+            } else {
+                state.messages.forEach(msg => {
+                    renderMessage(msg.role, msg.content);
+                });
+            }
+            renderRecents(); // Update active highlight
+        }
+
+        function saveMessages() {
+            if (!state.currentChatId) return;
+            localStorage.setItem(`dormbuddy_msg_${state.currentChatId}`, JSON.stringify(state.messages));
         }
 
         renderRecents(); // Init sidebar
+
+        // Hook into sendMessage to save state
+        const originalSendMessage = sendMessage;
+        sendMessage = async function () {
+            const text = chatInput.value.trim();
+            if (!text || state.isLoading) return;
+
+            // Save User Message
+            state.messages.push({ role: 'user', content: text });
+            saveMessages();
+
+            state.isLoading = true;
+            chatInput.value = '';
+            adjustHeight();
+
+            renderMessage('user', text);
+            const aiContainer = renderMessage('assistant', '', true);
+            const aiTextDiv = aiContainer.querySelector('.ai-content');
+
+            try {
+                // Save to history metadata if new
+                saveChatToHistory(text);
+
+                const response = await axios.post('http://127.0.0.1:8000/chat', {
+                    message: text,
+                    personality: state.personality
+                });
+
+                if (response.data.error) throw new Error(response.data.error);
+
+                const reply = response.data.reply;
+                aiTextDiv.innerHTML = formatAIContent(reply);
+
+                // Save AI Message
+                state.messages.push({ role: 'assistant', content: reply });
+                saveMessages();
+
+            } catch (err) {
+                console.error(err);
+                aiContainer.remove();
+                let msg = "Connection Failed.";
+                if (err.response && err.response.data && err.response.data.error) {
+                    msg = err.response.data.error;
+                }
+                showError(msg);
+            } finally {
+                state.isLoading = false;
+            }
+        };
 
         // Initial Greeting
         renderMessage('assistant', "Hello! I'm DormBuddy. How can I help you today?");
