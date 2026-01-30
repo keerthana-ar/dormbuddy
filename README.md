@@ -1,85 +1,82 @@
-# DormBuddy
+# DormBuddy 🎓
 
-DormBuddy is an AI-powered college assistant web app with fun personalities to help you with academics, life advice, and emotional support.
+> **Your AI-powered college companion.**  
+> A high-fidelity, Claude-like chat interface with 3 unique personalities designed to guide you through university life.
 
-## Live Demo
+![DormBuddy UI](https://via.placeholder.com/800x450.png?text=DormBuddy+Interface)
 
-- **Frontend:** [DormBuddy on Netlify](https://dormbuddyyy.netlify.app/)
-- **Backend API:** [DormBuddy API on Render](https://dormbuddy.onrender.com/)
+## ✨ Features
 
-## Features
+- **Professional UI**: A pixel-perfect clone of modern chat interfaces (inspired by Claude.ai), featuring:
+    - Warm, minimalist aesthetic (`#f7f7f5`).
+    - Elegant typography (Merriweather for AI, Inter for UI).
+    - Smooth streaming text effects.
+- **3 Unique Personalities**:
+    - 🍻 **Roomie**: Your chill best friend for life advice and venting.
+    - 🎓 **Professor**: Academic expert for explanations and study tips.
+    - 🌷 **Therapist**: Empathetic support for stress and motivation.
+- **Robust AI Backend**:
+    - Powered by **OpenRouter** (access to top-tier models).
+    - **Smart Fallback System**: Automatically switches between models (Arcee Trinity, Gemma 3, Llama 3.3, etc.) to ensure *zero downtime* and *no 404 errors*.
+- **Persistent History**:
+    - Your chats are automatically saved to your browser.
+    - Sidebar with "Recents" to jump back into past conversations instantly.
 
-- **Three AI personalities:**
-  - **Professor:** Academic help, clear explanations
-  - **Therapist:** Emotional support, kind advice
-  - **Roomie:** Casual, friendly, Gen Z-coded advice
+## 🚀 Tech Stack
 
-- **Modern UI:**
-  - Responsive, clean design using Tailwind CSS
-  - Animated chat bubbles and mode selector
+- **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (via CDN).
+- **Backend**: Python, FastAPI, HTTPX.
+- **AI Provider**: OpenRouter API.
 
-- **FastAPI backend:**
-  - Integrates with Groq LLM API
-  - Personality-based system prompts
+## 🛠️ Installation & Setup
 
-## Getting Started
+### 1. Backend
 
-### 1. Backend Setup
+The backend handles the connection to OpenRouter and manages the AI personalities.
 
-1. Install dependencies:
-    ```sh
-    cd backend
-    pip install -r requirements.txt
-    ```
+```bash
+# 1. Navigate to backend folder
+cd backend
 
-2. Set up `.env`:
-    ```
-    GROQ_API_KEY=your_groq_api_key_here
-    ```
-3. Run the backend:
-    ```sh
-    uvicorn main:app --reload
-    ```
+# 2. Create a virtual environment (optional but recommended)
+python -m venv venv
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
 
-### 2. Frontend Setup
-
-The frontend is a static HTML file using CDN scripts.
-Open `frontend/index.html` in your browser, or serve it with any static server.
-
-### 3. Usage
-
-- Select a personality and start chatting!
-- The backend will respond using the selected AI persona.
-
-## API
-
-- `POST /chat`
-  Request JSON:
-  ```json
-  {
-    "message": "Your question",
-    "personality": "roomie" | "professor" | "therapist"
-    }
-  ```
-  Response JSON:
-  ```json
-  {
-    "reply": "AI response"
-  }
-  ```
-
-## Project Structure
-
-```
-frontend/
-  index.html           # Main web UI
-backend/
-  main.py              # FastAPI backend
-  requirements.txt     # Python dependencies
-  .env                 # Environment variables (GROQ_API_KEY)
+# 3. Install dependencies
+pip install -r requirements.txt
 ```
 
+**Configuration (`.env`):**
+Create a `.env` file in the `backend` folder:
+```env
+OPENROUTER_API_KEY=your_key_here
+```
 
-## License
+**Run the Server:**
+```bash
+uvicorn main:app --reload
+```
+*Server runs at `http://127.0.0.1:8000`*
 
-MIT © 2025 Keerthana A R
+### 2. Frontend
+
+The frontend is a lightweight static file. No build process required!
+
+1.  Open `frontend/index.html` in your browser.
+2.  (Optional) For a better experience, use a simple HTTP server:
+    ```bash
+    # In frontend folder
+    python -m http.server 5500
+    ```
+
+## 💡 Usage
+
+1.  **Select a Mode**: Click the icon above the chat input (🍻, 🎓, 🌷) to switch personalities.
+2.  **Chat**: Type your message and hit Enter.
+3.  **New Chat**: Click "New Chat" in the sidebar to start fresh.
+4.  **History**: Click any item in the "Recents" list to load that conversation.
+
+## 📄 License
+
+MIT © 2026 Keerthana A R
